@@ -1,0 +1,102 @@
+/* View Page  */
+.view-container {
+  /* display: flex; */
+}
+
+.view-header-h {
+  width: 50vw !important;
+  margin-left: 20vw !important;
+}
+
+.view-header-search {
+  /* width: 40vw; */
+  width: 50vw !important;
+  margin-left: 20vw !important;
+  justify-content: center;
+  align-items: center;
+}
+
+.view-section {
+  display: flex;
+}
+
+.view-section-accordion {
+  width: 50vw;
+  margin-left: 20vw;
+  gap: 2rem;
+}
+
+.view-section-accordion-item {
+  background-color: aquamarine;
+  border-radius: 10px;
+  margin-top: 1rem;
+}
+
+.accordion {
+  gap: 2rem;
+}
+
+.accordion-button {
+  width: 43vw;
+}
+
+@media (max-width: 1186px) {
+  .accordion-button {
+    width: 42vw;
+  }
+}
+
+@media (max-width: 1040px) {
+  .accordion-button {
+    width: 40vw;
+  }
+}
+
+@media (max-width: 837px) {
+  .accordion-button {
+    width: 38vw;
+  }
+}
+
+@media (max-width: 688px) {
+  .accordion-button {
+    width: 34vw;
+  }
+}
+
+@media (max-width: 513px) {
+  .accordion-button {
+    width: 30vw;
+  }
+}
+
+@media (max-width: 412px) {
+  .accordion-button {
+    width: 25vw;
+  }
+  .view-section-header-name {
+    margin-left: -25px;
+  }
+}
+@media (max-width: 330px) {
+  .accordion-button {
+    width: 20vw;
+  }
+  .view-section-header-name {
+    margin-left: -28px;
+  }
+}
+
+.accordion-button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent;
+}
+
+.bordered-p {
+  border: 1px solid #ced4da;
+  padding: 8px;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+  margin-bottom: 10px;
+}
