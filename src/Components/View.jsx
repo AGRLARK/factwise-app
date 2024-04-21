@@ -1,21 +1,21 @@
-
+import { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import Accordion from 'react-bootstrap/Accordion';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 import userData from '../celebrities.json';
-import { useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Create';
 import SaveIcon from '@mui/icons-material/CheckCircleOutline';
 import CloseIcon from '@mui/icons-material/HighlightOff';
-
 
 const View = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [editingUser, setEditingUser] = useState(null);
     const [editedUser, setEditedUser] = useState(null);
     const [users, setUsers] = useState(userData);
-
-
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
 
     const genders = ['Male', 'Female', 'Transgender', 'Rather not say', 'Other'];
 
@@ -35,7 +35,6 @@ const View = () => {
     const handleEditClick = (userId) => {
         const user = users.find((user) => user.id === userId);
 
-        // Check if the user is an adult (age > 18)
         const userAge = calculateAge(user.dob);
         if (userAge < 18) {
             alert("You can only edit users who are adults (18 years or older).");
@@ -57,27 +56,39 @@ const View = () => {
             setEditedUser({ ...user });
         }
     }
+
     const handleInputChange = (e, key) => {
         const value = e.target.value;
 
         if (key === 'country') {
-            if (!/^[a-zA-Z\s]*$/.test(value)) {
+            if (/\d/.test(value)) {
                 return;
             }
+            setEditedUser(prevState => ({
+                ...prevState,
+                [key]: value
+            }));
+        } else if (key === 'age') {
+            if (!/^\d*$/.test(value)) {
+                return;
+            }
+            const dobYear = value ? new Date().getFullYear() - parseInt(value) : '';
+            const dobMonth = editedUser.dob ? editedUser.dob.split('-')[1] : '01';
+            const dobDay = editedUser.dob ? editedUser.dob.split('-')[2] : '01';
+            setEditedUser(prevState => ({
+                ...prevState,
+                dob: value ? `${dobYear}-${dobMonth}-${dobDay}` : '',
+                [key]: value
+            }));
+        } else {
+            setEditedUser(prevState => ({
+                ...prevState,
+                [key]: value
+            }));
         }
-        setEditedUser(prevState => ({
-            ...prevState,
-            [key]: value
-        }));
     }
 
     const handleSaveClick = () => {
-        const isEmpty = Object.values(editedUser).some(value => value === '');
-        if (isEmpty) {
-            alert('Please fill in all fields before saving.');
-            return;
-        }
-
         const updatedUsers = users.map(user => {
             if (user.id === editingUser) {
                 return { ...editedUser };
@@ -85,20 +96,27 @@ const View = () => {
             return user;
         });
         setUsers(updatedUsers);
-        setEditingUser(null);
-        setEditedUser(null);
     };
 
     const handleDeleteClick = (userId) => {
-        console.log('Deleted user:', userId);
-        const updatedUsers = users.filter(user => user.id !== userId);
+        setUserToDelete(userId);
+        setShowDeleteConfirmation(true);
+    };
+
+    const confirmDelete = () => {
+        const updatedUsers = users.filter(user => user.id !== userToDelete);
         setUsers(updatedUsers);
-    }
+        setShowDeleteConfirmation(false);
+    };
+
+    const cancelDelete = () => {
+        setShowDeleteConfirmation(false);
+    };
 
     const cancelEdit = () => {
         setEditingUser(null);
         setEditedUser(null);
-    }
+    };
 
     return (
         <>
@@ -153,8 +171,8 @@ const View = () => {
                                                             <input
                                                                 type="text"
                                                                 className="form-control"
-                                                                value={editedUser?.dob}
-                                                                onChange={(e) => handleInputChange(e, 'dob')}
+                                                                value={calculateAge(editedUser.dob) || ''}
+                                                                onChange={(e) => handleInputChange(e, 'age')}
                                                             />
                                                         ) : (
                                                             <p>{calculateAge(user.dob)} Years</p>
@@ -233,9 +251,24 @@ const View = () => {
                     </div>
                 </div >
             </div >
-
+            {/* Delete Confirmation Dialog */}
+            <Modal show={showDeleteConfirmation} onHide={cancelDelete}>
+                <Modal.Header closeButton>
+                </Modal.Header>
+                <Modal.Body closeButton>
+                    Are you sure you want to delete ?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={cancelDelete}>
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={confirmDelete}>
+                        Delete
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     )
 }
 
-export default View
+export default View;
