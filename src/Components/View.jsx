@@ -16,6 +16,7 @@ const View = () => {
     const [users, setUsers] = useState(userData);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
+    const [saveDisabled, setSaveDisabled] = useState(true); // State to control save button
 
     const genders = ['Male', 'Female', 'Transgender', 'Rather not say', 'Other'];
 
@@ -40,8 +41,11 @@ const View = () => {
             alert("You can only edit users who are adults (18 years or older).");
             return;
         }
+        console.log(userId, editingUser, 'handle edit')
         if (editingUser === userId) {
-            setEditingUser(null);
+            console.log('if block handle edit')
+            if (editedUser?.description?.length != 0 || editedUser?.age?.length != 0 || editedUser?.country?.length != 0) setEditingUser(null);
+            else setEditingUser(userId)
             const updatedUsers = users.map(user => {
                 if (user.id === userId) {
                     return { ...editedUser };
@@ -50,10 +54,14 @@ const View = () => {
             });
             setUsers(updatedUsers);
             setEditedUser(null);
+            setSaveDisabled(true); // Disable save button after saving
         } else {
+            console.log('else block handle edit')
+
             setEditingUser(userId);
             const user = users.find(user => user.id === userId);
             setEditedUser({ ...user });
+            setSaveDisabled(true); // Disable save button when editing starts
         }
     }
 
@@ -68,6 +76,7 @@ const View = () => {
                 ...prevState,
                 [key]: value
             }));
+            setSaveDisabled(false);
         } else if (key === 'age') {
             if (!/^\d*$/.test(value)) {
                 return;
@@ -80,22 +89,39 @@ const View = () => {
                 dob: value ? `${dobYear}-${dobMonth}-${dobDay}` : '',
                 [key]: value
             }));
+            setSaveDisabled(false); // Enable save button when input changes
         } else {
             setEditedUser(prevState => ({
                 ...prevState,
                 [key]: value
             }));
+
+            setSaveDisabled(false);
+            // Enable save button when input changes
         }
     }
 
-    const handleSaveClick = () => {
-        const updatedUsers = users.map(user => {
-            if (user.id === editingUser) {
-                return { ...editedUser };
-            }
-            return user;
-        });
-        setUsers(updatedUsers);
+
+    const handleSaveClick = (userId) => {
+        console.log(userId, 'handle save user id')
+        if (editedUser?.description?.length == 0 || editedUser?.age?.length == 0 || editedUser?.country?.length == 0) {
+            alert('do not leave empty');
+            setEditingUser(userId)
+            // return;
+        } else {
+            const updatedUsers = users.map(user => {
+                if (user.id === editingUser) {
+                    // if(edited)
+                    return { ...editedUser };
+                }
+                return user;
+            });
+            // console.log(updatedUsers, editingUser, editedUser, 'updatedUsers')
+            setUsers(updatedUsers);
+            setEditingUser(null)
+            setSaveDisabled(true); // Disable save button after saving
+        }
+
     };
 
     const handleDeleteClick = (userId) => {
@@ -114,8 +140,10 @@ const View = () => {
     };
 
     const cancelEdit = () => {
+        console.log('cancel edi')
         setEditingUser(null);
         setEditedUser(null);
+        setSaveDisabled(true); // Disable save button when editing is canceled
     };
 
     return (
@@ -236,9 +264,10 @@ const View = () => {
                                                             type="button"
                                                             className="btn outline-primary"
                                                             style={{ color: 'blue' }}
-                                                            onClick={() => handleEditClick(user.id)}
+                                                            disabled={editingUser === user.id && saveDisabled} // Disable save button if editing and saveDisabled is true
+                                                            onClick={() => editingUser === user.id ? handleSaveClick(user.id) : handleEditClick(user.id)}
                                                         >
-                                                            {editingUser === user.id ? <SaveIcon onClick={handleSaveClick} /> : <EditIcon />}
+                                                            {editingUser === user.id ? <SaveIcon /> : <EditIcon />}
                                                         </button>
                                                     </div>
                                                 </div>
